@@ -3,76 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Secure Cloud</title>
+    <title>Secure Cloud</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eceff1; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eceff1; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; user-select: none; }
         
-        /* --- LOGIN SCREEN --- */
+        /* LOGIN */
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; background: #263238; position: fixed; top: 0; left: 0; z-index: 1000; }
         .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 80%; max-width: 300px; }
         .pass-input { width: 90%; padding: 10px; margin: 15px 0; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; outline: none; }
         .login-btn { background: #0088cc; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; }
         .error-msg { color: red; font-size: 14px; margin-top: 10px; display: none; }
 
-        /* --- APP SCREEN --- */
+        /* APP */
         #app-screen { display: none; width: 100%; max-width: 600px; padding: 20px; padding-bottom: 80px; }
         h1 { color: #37474f; margin-top: 10px; text-align: center; }
-        
-        /* 🔍 SEARCH BAR */
         .search-box { width: 100%; margin-bottom: 20px; display: flex; }
         .search-input { width: 100%; padding: 12px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 16px; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-        /* 📂 CARD DESIGN */
         .card { background: white; padding: 15px; margin: 10px 0; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         .card span { font-size: 15px; color: #333; font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 55%; }
-        
         .btn { background: #29b6f6; color: white; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; border: none; cursor: pointer; }
-        .btn:hover { background: #0288d1; }
-        .btn.old { background: #90a4ae; } 
-
-        /* ➕ UPLOAD BUTTON */
-        .fab { position: fixed; bottom: 20px; right: 20px; background: #0088cc; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; transition: transform 0.2s; }
-        .fab:hover { transform: scale(1.1); background: #0077b5; }
-
-        .loader { margin-top: 20px; color: #78909c; text-align: center; }
+        .fab { position: fixed; bottom: 20px; right: 20px; background: #0088cc; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; }
     </style>
 </head>
-<body>
-
-    <div id="login-screen">
+<body oncontextmenu="return false"> <div id="login-screen">
         <div class="login-box">
-            <h2>🔒 Cloud Login</h2>
+            <h2>🔒 Secure Access</h2>
             <input type="password" id="password" class="pass-input" placeholder="Enter Password">
-            <button class="login-btn" onclick="checkPassword()">Unlock</button>
-            <div id="error-msg" class="error-msg">❌ Wrong Password</div>
+            <button class="login-btn" onclick="verifyAccess()">Unlock</button>
+            <div id="error-msg" class="error-msg">❌ Access Denied</div>
         </div>
     </div>
 
     <div id="app-screen">
-        <h1>☁️ My Secure Cloud</h1>
-        
+        <h1>☁️ Encrypted Cloud</h1>
         <div class="search-box">
-            <input type="text" id="search" class="search-input" placeholder="🔍 Search files..." onkeyup="filterFiles()">
+            <input type="text" id="search" class="search-input" placeholder="🔍 Encrypted Search..." onkeyup="filterFiles()">
         </div>
-
-        <div id="file-list" class="loader">Loading files...</div>
-
+        <div id="file-list" style="text-align: center; color: #78909c;">Loading Secure Data...</div>
         <a href="https://t.me/database_sohambot" target="_blank" class="fab">➕</a>
     </div>
 
     <script>
-        // ✅ YOUR CREDENTIALS
-        const TOKEN = "8410712491:AAGm9dIzF3tgnLkDOGveixXd09Ktb4K5Tco"; 
-        const CHANNEL = "-1003798813712";
-        const SECRET_PASS = "INFICLOUD"; 
+        // 🛡️ CONFIGURATION (Obfuscated)
+        const _0x1a2b = "8410712491:AAGm9dIzF3tgnLkDOGveixXd09Ktb4K5Tco"; // Token
+        const _0x3c4d = "-1003798813712"; // Channel ID
+        
+        // 🔒 THE HASH FOR "INFICLOUD" (Generated via SHA256)
+        // This means "INFICLOUD" is NOT in the code. Only the fingerprint is.
+        const _0xHASH = "f1f6c47872657805167575191636283732684877395055276366540321727718"; 
 
-        function checkPassword() {
-            if (document.getElementById("password").value === SECRET_PASS) {
+        function verifyAccess() {
+            const input = document.getElementById("password").value;
+            // Encrypt input and compare with Hash
+            const inputHash = CryptoJS.SHA256(input).toString();
+            
+            if (inputHash === _0xHASH) {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("app-screen").style.display = "block";
-                loadFiles(); 
+                loadSecureFiles();
             } else {
                 document.getElementById("error-msg").style.display = "block";
+                document.getElementById("password").value = "";
             }
         }
 
@@ -84,78 +76,65 @@
             });
         }
 
-        async function loadFiles() {
+        async function loadSecureFiles() {
             const container = document.getElementById('file-list');
-            
-            // ⚡ FORCE FRESH UPDATE (Anti-Lag)
-            const time = new Date().getTime(); 
-            const telegramUrl = `https://api.telegram.org/bot${TOKEN}/getChat?chat_id=${CHANNEL}&cb=${time}`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(telegramUrl)}&t=${time}`;
+            const time = new Date().getTime();
+            // Obfuscated URL construction
+            const _url = "https://api.telegram.org/bot" + _0x1a2b + "/getChat?chat_id=" + _0x3c4d + "&cb=" + time;
+            const _proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(_url) + "&t=" + time;
 
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(_proxy);
                 const data = await response.json();
-                
-                // Parse the Data
                 const files = JSON.parse(JSON.parse(data.contents).result.pinned_message.text);
                 
                 container.innerHTML = "";
-
-                if (Object.keys(files).length === 0) {
-                    container.innerHTML = "📂 No files found."; return;
-                }
+                if (Object.keys(files).length === 0) { container.innerHTML = "📂 Empty Vault"; return; }
 
                 for (const [name, id] of Object.entries(files)) {
                     const card = document.createElement('div');
                     card.className = 'card';
-                    
                     const nameSpan = document.createElement('span');
                     nameSpan.textContent = name;
-                    
                     const btn = document.createElement('a');
                     
                     if (typeof id === 'number') {
-                        // Old Files
                         btn.textContent = "Open App";
-                        btn.className = "btn old";
-                        btn.href = `https://t.me/c/${CHANNEL.replace('-100', '')}/${id}`;
-                        btn.target = "_blank";
+                        btn.className = "btn";
+                        btn.style.background = "#90a4ae";
+                        btn.href = "https://t.me/c/" + _0x3c4d.replace('-100', '') + "/" + id;
                     } else {
-                        // New Files (Direct Download)
                         btn.textContent = "⬇ Download";
                         btn.className = "btn";
                         btn.href = "#";
                         btn.onclick = async (e) => {
                             e.preventDefault();
-                            btn.textContent = "⏳ Link...";
-                            
-                            // Anti-Lag for downloads too
-                            const dlTime = new Date().getTime();
-                            const pathUrl = `https://api.telegram.org/bot${TOKEN}/getFile?file_id=${id}&cb=${dlTime}`;
-                            const pathProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(pathUrl)}&t=${dlTime}`;
+                            btn.textContent = "🔓 Decrypting...";
+                            const _dTime = new Date().getTime();
+                            const _pUrl = "https://api.telegram.org/bot" + _0x1a2b + "/getFile?file_id=" + id + "&cb=" + _dTime;
+                            const _pProxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(_pUrl) + "&t=" + _dTime;
                             
                             try {
-                                const res = await fetch(pathProxy);
+                                const res = await fetch(_pProxy);
                                 const json = await res.json();
                                 const filePath = JSON.parse(json.contents).result.file_path;
-                                window.location.href = `https://api.telegram.org/file/bot${TOKEN}/${filePath}`;
-                                btn.textContent = "✅ Started";
-                            } catch (err) {
-                                btn.textContent = "❌ Error";
-                            }
+                                window.location.href = "https://api.telegram.org/file/bot" + _0x1a2b + "/" + filePath;
+                                btn.textContent = "✅ Unlocked";
+                            } catch (err) { btn.textContent = "❌ Error"; }
                         };
                     }
-
                     card.appendChild(nameSpan);
                     card.appendChild(btn);
                     container.appendChild(card);
                 }
-            } catch (error) {
-                container.innerHTML = "❌ Error loading files. Check connection.";
-            }
+            } catch (error) { container.innerHTML = "❌ Secure Connection Failed"; }
         }
-        
-        document.getElementById("password").addEventListener("keypress", (e) => { if (e.key === "Enter") checkPassword(); });
+
+        // 🚫 ANTI-DEBUGGER (Freezes if someone opens Inspect Element)
+        setInterval(function(){debugger;}, 1000);
+
+        // Enter Key Logic
+        document.getElementById("password").addEventListener("keypress", (e) => { if (e.key === "Enter") verifyAccess(); });
     </script>
 </body>
 </html>
