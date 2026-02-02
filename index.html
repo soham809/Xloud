@@ -92,67 +92,61 @@
             const query = document.getElementById('search').value.toLowerCase();
             document.querySelectorAll('.file-item').forEach(item => {
                 const name = item.querySelector('.file-name').textContent.toLowerCase();
-                // When searching, we show the file but might hide the folder structure visually if you want, 
-                // but simpler is to just hide non-matching items.
                 item.style.display = name.includes(query) ? "flex" : "none";
             });
-            
-            // Auto-open folders if they contain matches
             document.querySelectorAll('details').forEach(folder => {
                 const hasVisible = Array.from(folder.querySelectorAll('.file-item')).some(i => i.style.display !== "none");
                 folder.style.display = hasVisible ? "block" : "none";
-                if (query.length > 0) folder.open = true; // Open folders when searching
+                if (query.length > 0) folder.open = true; 
             });
         }
 
         async function loadFiles() {
             const container = document.getElementById('file-list');
             const time = new Date().getTime(); 
+            
+            // 🛡️ STRONG CONNECTION (Added Error Handling)
             const telegramUrl = `https://api.telegram.org/bot${TOKEN}/getChat?chat_id=${CHANNEL}&cb=${time}`;
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(telegramUrl)}&t=${time}`;
 
             try {
                 const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error("Network response was not ok");
+                
                 const data = await response.json();
                 const files = JSON.parse(JSON.parse(data.contents).result.pinned_message.text);
                 
                 container.innerHTML = "";
                 if (Object.keys(files).length === 0) { container.innerHTML = "📂 No files found."; return; }
 
-                // 1. Group Files into Folders
                 const folders = { "📂 General": [] };
                 
                 for (const [name, id] of Object.entries(files)) {
-                    // Check for [Category] Name format
                     const match = name.match(/^\[(.*?)\]\s*(.*)/);
                     let folderName = "📂 General";
                     let displayName = name;
                     
                     if (match) {
-                        folderName = "📁 " + match[1]; // The text inside []
-                        displayName = match[2]; // The text after []
+                        folderName = "📁 " + match[1]; 
+                        displayName = match[2]; 
                     }
-                    
                     if (!folders[folderName]) folders[folderName] = [];
                     
-                    // Add Icon Logic Here
                     let icon = "📄";
+                    let isImage = false;
                     const lower = name.toLowerCase();
                     if (lower.endsWith('.pdf')) icon = "📕";
-                    else if (lower.endsWith('.jpg') || lower.endsWith('.png')) icon = "🖼️";
+                    else if (lower.endsWith('.jpg') || lower.endsWith('.png') || lower.endsWith('.jpeg')) { icon = "🖼️"; isImage = true; }
                     else if (lower.endsWith('.mp4')) icon = "🎥";
                     else if (lower.endsWith('.zip')) icon = "📦";
 
-                    folders[folderName].push({ name: `${icon} ${displayName}`, id: id });
+                    folders[folderName].push({ name: `${icon} ${displayName}`, id: id, isImage: isImage });
                 }
 
-                // 2. Render Folders
                 for (const [folderName, items] of Object.entries(folders)) {
                     if (items.length === 0) continue;
-
                     const details = document.createElement('details');
-                    details.open = true; // Default to open
-                    
+                    details.open = true; 
                     const summary = document.createElement('summary');
                     summary.textContent = folderName;
                     details.appendChild(summary);
@@ -160,7 +154,6 @@
                     items.forEach(file => {
                         const div = document.createElement('div');
                         div.className = 'file-item';
-                        
                         const span = document.createElement('span');
                         span.className = 'file-name';
                         span.textContent = file.name;
@@ -185,21 +178,27 @@
                                     const res = await fetch(pathProxy);
                                     const json = await res.json();
                                     const filePath = JSON.parse(json.contents).result.file_path;
-                                    window.location.href = `https://api.telegram.org/file/bot${TOKEN}/${filePath}`;
-                                    btn.textContent = "✅";
+                                    const finalLink = `https://api.telegram.org/file/bot${TOKEN}/${filePath}`;
+                                    
+                                    if (file.isImage) {
+                                        window.open(finalLink, '_blank');
+                                        btn.textContent = "👁️";
+                                    } else {
+                                        window.location.href = finalLink;
+                                        btn.textContent = "✅";
+                                    }
                                 } catch (err) { btn.textContent = "❌"; }
                             };
                         }
-                        
                         div.appendChild(span);
                         div.appendChild(btn);
                         details.appendChild(div);
                     });
-                    
                     container.appendChild(details);
                 }
-                
-            } catch (error) { container.innerHTML = "❌ Connection Error."; }
+            } catch (error) { 
+                container.innerHTML = "<div style='color:red; text-align:center;'>❌ Connection Error.<br><button class='btn' onclick='loadFiles()' style='margin-top:10px'>Retry ↻</button></div>"; 
+            }
         }
         
         document.getElementById("password").addEventListener("keypress", (e) => { if (e.key === "Enter") checkPassword(); });
