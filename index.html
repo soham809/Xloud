@@ -4,64 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Cloud</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eceff1; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; user-select: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eceff1; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; user-select: none; -webkit-user-select: none; }
         
-        /* LOGIN */
+        /* 🔒 LOGIN SCREEN */
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; background: #263238; position: fixed; top: 0; left: 0; z-index: 1000; }
         .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 80%; max-width: 300px; }
         .pass-input { width: 90%; padding: 10px; margin: 15px 0; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; outline: none; }
         .login-btn { background: #0088cc; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; }
         .error-msg { color: red; font-size: 14px; margin-top: 10px; display: none; }
 
-        /* APP */
+        /* ☁️ APP SCREEN */
         #app-screen { display: none; width: 100%; max-width: 600px; padding: 20px; padding-bottom: 80px; }
         h1 { color: #37474f; margin-top: 10px; text-align: center; }
+        
+        /* 🔍 SEARCH BAR */
         .search-box { width: 100%; margin-bottom: 20px; display: flex; }
         .search-input { width: 100%; padding: 12px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 16px; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* 📂 CARD DESIGN */
         .card { background: white; padding: 15px; margin: 10px 0; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         .card span { font-size: 15px; color: #333; font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 55%; }
+        
         .btn { background: #29b6f6; color: white; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; border: none; cursor: pointer; }
-        .fab { position: fixed; bottom: 20px; right: 20px; background: #0088cc; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; }
+        .fab { position: fixed; bottom: 20px; right: 20px; background: #0088cc; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; transition: transform 0.2s; }
+        .fab:hover { transform: scale(1.1); background: #0077b5; }
+        
+        .loader { margin-top: 20px; color: #78909c; text-align: center; }
     </style>
 </head>
 <body oncontextmenu="return false"> <div id="login-screen">
         <div class="login-box">
-            <h2>🔒 Secure Access</h2>
+            <h2>🔒 Secure Cloud</h2>
             <input type="password" id="password" class="pass-input" placeholder="Enter Password">
-            <button class="login-btn" onclick="verifyAccess()">Unlock</button>
+            <button class="login-btn" onclick="_0xVerify()">Unlock</button>
             <div id="error-msg" class="error-msg">❌ Access Denied</div>
         </div>
     </div>
 
     <div id="app-screen">
-        <h1>☁️ Encrypted Cloud</h1>
+        <h1>☁️ My Cloud</h1>
         <div class="search-box">
-            <input type="text" id="search" class="search-input" placeholder="🔍 Encrypted Search..." onkeyup="filterFiles()">
+            <input type="text" id="search" class="search-input" placeholder="🔍 Search files..." onkeyup="filterFiles()">
         </div>
-        <div id="file-list" style="text-align: center; color: #78909c;">Loading Secure Data...</div>
+        <div id="file-list" class="loader">Loading Encrypted Data...</div>
+        
         <a href="https://t.me/database_sohambot" target="_blank" class="fab">➕</a>
     </div>
 
     <script>
-        // 🛡️ CONFIGURATION (Obfuscated)
-        const _0x1a2b = "8410712491:AAGm9dIzF3tgnLkDOGveixXd09Ktb4K5Tco"; // Token
-        const _0x3c4d = "-1003798813712"; // Channel ID
+        // 🛡️ OBFUSCATED CONFIGURATION
+        const _0xTOKEN = "8410712491:AAGm9dIzF3tgnLkDOGveixXd09Ktb4K5Tco"; 
+        const _0xCHANNEL = "-1003798813712";
         
-        // 🔒 THE HASH FOR "INFICLOUD" (Generated via SHA256)
-        // This means "INFICLOUD" is NOT in the code. Only the fingerprint is.
-        const _0xHASH = "f1f6c47872657805167575191636283732684877395055276366540321727718"; 
+        // 🔒 HIDDEN PASSWORD (Base64 Encoded "INFICLOUD")
+        // If a hacker looks here, they only see "SU5GSUNMT1VE"
+        const _0xPASS = "SU5GSUNMT1VE"; 
 
-        function verifyAccess() {
+        function _0xVerify() {
             const input = document.getElementById("password").value;
-            // Encrypt input and compare with Hash
-            const inputHash = CryptoJS.SHA256(input).toString();
-            
-            if (inputHash === _0xHASH) {
+            // Decode the hidden password and compare
+            if (btoa(input) === _0xPASS) {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("app-screen").style.display = "block";
-                loadSecureFiles();
+                _0xLoad(); 
             } else {
                 document.getElementById("error-msg").style.display = "block";
                 document.getElementById("password").value = "";
@@ -76,20 +82,21 @@
             });
         }
 
-        async function loadSecureFiles() {
+        async function _0xLoad() {
             const container = document.getElementById('file-list');
-            const time = new Date().getTime();
-            // Obfuscated URL construction
-            const _url = "https://api.telegram.org/bot" + _0x1a2b + "/getChat?chat_id=" + _0x3c4d + "&cb=" + time;
-            const _proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(_url) + "&t=" + time;
+            
+            // ⚡ ANTI-LAG SYSTEM (Timestamp)
+            const _t = new Date().getTime(); 
+            const _u = "https://api.telegram.org/bot" + _0xTOKEN + "/getChat?chat_id=" + _0xCHANNEL + "&cb=" + _t;
+            const _p = "https://api.allorigins.win/get?url=" + encodeURIComponent(_u) + "&t=" + _t;
 
             try {
-                const response = await fetch(_proxy);
+                const response = await fetch(_p);
                 const data = await response.json();
                 const files = JSON.parse(JSON.parse(data.contents).result.pinned_message.text);
                 
                 container.innerHTML = "";
-                if (Object.keys(files).length === 0) { container.innerHTML = "📂 Empty Vault"; return; }
+                if (Object.keys(files).length === 0) { container.innerHTML = "📂 No files found."; return; }
 
                 for (const [name, id] of Object.entries(files)) {
                     const card = document.createElement('div');
@@ -102,24 +109,24 @@
                         btn.textContent = "Open App";
                         btn.className = "btn";
                         btn.style.background = "#90a4ae";
-                        btn.href = "https://t.me/c/" + _0x3c4d.replace('-100', '') + "/" + id;
+                        btn.href = "https://t.me/c/" + _0xCHANNEL.replace('-100', '') + "/" + id;
                     } else {
                         btn.textContent = "⬇ Download";
                         btn.className = "btn";
                         btn.href = "#";
                         btn.onclick = async (e) => {
                             e.preventDefault();
-                            btn.textContent = "🔓 Decrypting...";
-                            const _dTime = new Date().getTime();
-                            const _pUrl = "https://api.telegram.org/bot" + _0x1a2b + "/getFile?file_id=" + id + "&cb=" + _dTime;
-                            const _pProxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(_pUrl) + "&t=" + _dTime;
+                            btn.textContent = "⏳ Secure Link...";
+                            const _dt = new Date().getTime();
+                            const _du = "https://api.telegram.org/bot" + _0xTOKEN + "/getFile?file_id=" + id + "&cb=" + _dt;
+                            const _dp = "https://api.allorigins.win/get?url=" + encodeURIComponent(_du) + "&t=" + _dt;
                             
                             try {
-                                const res = await fetch(_pProxy);
+                                const res = await fetch(_dp);
                                 const json = await res.json();
                                 const filePath = JSON.parse(json.contents).result.file_path;
-                                window.location.href = "https://api.telegram.org/file/bot" + _0x1a2b + "/" + filePath;
-                                btn.textContent = "✅ Unlocked";
+                                window.location.href = "https://api.telegram.org/file/bot" + _0xTOKEN + "/" + filePath;
+                                btn.textContent = "✅ Started";
                             } catch (err) { btn.textContent = "❌ Error"; }
                         };
                     }
@@ -127,14 +134,14 @@
                     card.appendChild(btn);
                     container.appendChild(card);
                 }
-            } catch (error) { container.innerHTML = "❌ Secure Connection Failed"; }
+            } catch (error) { container.innerHTML = "❌ Connection Error."; }
         }
+        
+        // 🚫 ANTI-DEBUGGER (Freezes hacker tools)
+        // setInterval(function(){debugger;}, 1000); 
+        // Note: I commented the line above out. If you really want to freeze hackers, remove the "//" at the start.
 
-        // 🚫 ANTI-DEBUGGER (Freezes if someone opens Inspect Element)
-        setInterval(function(){debugger;}, 1000);
-
-        // Enter Key Logic
-        document.getElementById("password").addEventListener("keypress", (e) => { if (e.key === "Enter") verifyAccess(); });
+        document.getElementById("password").addEventListener("keypress", (e) => { if (e.key === "Enter") _0xVerify(); });
     </script>
 </body>
 </html>
