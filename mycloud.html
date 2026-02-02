@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Cloud</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eceff1; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        /* --- LOGIN SCREEN CSS --- */
+        #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; background: #263238; position: fixed; top: 0; left: 0; z-index: 1000; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 80%; max-width: 300px; }
+        .login-box h2 { margin-top: 0; color: #333; }
+        .pass-input { width: 90%; padding: 10px; margin: 15px 0; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; outline: none; }
+        .pass-input:focus { border-color: #0088cc; }
+        .login-btn { background: #0088cc; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; }
+        .login-btn:active { transform: scale(0.98); }
+        .error-msg { color: red; font-size: 14px; margin-top: 10px; display: none; }
+
+        /* --- APP SCREEN CSS (Hidden by default) --- */
+        #app-screen { display: none; width: 100%; max-width: 600px; padding: 20px; }
+        h1 { color: #37474f; margin-top: 20px; }
+        
+        .card { background: white; padding: 15px; margin: 10px 0; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .card span { font-size: 15px; color: #333; font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 55%; }
+        
+        .btn { background: #29b6f6; color: white; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; border: none; cursor: pointer; }
+        .btn:hover { background: #0288d1; }
+        .btn.old { background: #90a4ae; } 
+        .loader { margin-top: 20px; color: #78909c; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>🔒 Security Check</h2>
+            <p>Enter password to access files.</p>
+            <input type="password" id="password" class="pass-input" placeholder="Password">
+            <button class="login-btn" onclick="checkPassword()">Unlock</button>
+            <div id="error-msg" class="error-msg">❌ Wrong Password</div>
+        </div>
+    </div>
+
+    <div id="app-screen">
+        <h1>☁️ My Secure Cloud</h1>
+        <div id="file-list" class="loader">Loading files...</div>
+    </div>
+
+    <script>
+        // ✅ YOUR CONFIGURATION
+        const TOKEN = "8410712491:AAGm9dIzF3tgnLkDOGveixXd09Ktb4K5Tco"; 
+        const CHANNEL = "-1003798813712";
+        const SECRET_PASS = "INFICLOUD"; // 🔑 The Password
+
+        // 1. PASSWORD CHECK FUNCTION
+        function checkPassword() {
+            const input = document.getElementById("password").value;
+            const error = document.getElementById("error-msg");
+            
+            if (input === SECRET_PASS) {
+                // Success: Hide Login, Show App, Load Files
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("app-screen").style.display = "block";
+                loadFiles(); // Only start loading data AFTER login
+            } else {
+                // Fail: Show error
+                error.style.display = "block";
+                document.getElementById("password").value = "";
+            }
+        }
+
+        // Allow pressing "Enter" key to login
+        document.getElementById("password").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") checkPassword();
+        });
+
+        // 2. MAIN APP LOGIC (Same as before)
+        async function loadFiles() {
+            const container = document.getElementById('file-list');
+            const telegramUrl = `https://api.telegram.org/bot${TOKEN}/getChat?chat_id=${CHANNEL}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(telegramUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                const files = JSON.parse(JSON.parse(data.contents).result.pinned_message.text);
+                
+                container.innerHTML = "";
+
+                if (Object.keys(files).length === 0) {
+                    container.innerHTML = "📂 No files found.";
+                    return;
+                }
+
+                for (const [name, id] of Object.entries(files)) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = name;
+                    
+                    const btn = document.createElement('a');
+                    
+                    if (typeof id === 'number') {
+                        btn.textContent = "Open App";
+                        btn.className = "btn old";
+                        btn.href = `https://t.me/c/${CHANNEL.replace('-100', '')}/${id}`;
+                        btn.target = "_blank";
+                    } else {
+                        btn.textContent = "⬇ Download";
+                        btn.className = "btn";
+                        btn.href = "#";
+                        btn.onclick = async (e) => {
+                            e.preventDefault();
+                            btn.textContent = "⏳ Link...";
+                            const pathUrl = `https://api.telegram.org/bot${TOKEN}/getFile?file_id=${id}`;
+                            const pathProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(pathUrl)}`;
+                            
+                            try {
+                                const res = await fetch(pathProxy);
+                                const json = await res.json();
+                                const filePath = JSON.parse(json.contents).result.file_path;
+                                window.location.href = `https://api.telegram.org/file/bot${TOKEN}/${filePath}`;
+                                btn.textContent = "✅ Started";
+                            } catch (err) {
+                                alert("Link expired or error.");
+                                btn.textContent = "❌ Error";
+                            }
+                        };
+                    }
+
+                    card.appendChild(nameSpan);
+                    card.appendChild(btn);
+                    container.appendChild(card);
+                }
+            } catch (error) {
+                container.innerHTML = "❌ Error loading files.";
+            }
+        }
+    </script>
+
+</body>
+</html>
