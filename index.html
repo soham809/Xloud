@@ -18,26 +18,32 @@
         #app-screen { display: none; width: 100%; max-width: 600px; padding: 20px; padding-bottom: 80px; }
         h1 { color: #37474f; margin-top: 10px; text-align: center; }
         
-        /* 🔍 SEARCH & REFRESH BAR (New Layout) */
+        /* CONTROLS */
         .controls { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
         .search-input { flex-grow: 1; padding: 12px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 16px; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        
-        /* 🔄 NEW REFRESH BUTTON */
         .refresh-btn { background: #fff; border: 1px solid #cfd8dc; border-radius: 8px; width: 45px; cursor: pointer; font-size: 20px; color: #546e7a; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .refresh-btn:active { background: #eceff1; transform: scale(0.95); }
 
-        /* 📂 CARD DESIGN */
-        .card { background: white; padding: 15px; margin: 10px 0; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .card span { font-size: 15px; color: #333; font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 55%; }
+        /* 📁 FOLDER STYLES */
+        details { background: #fff; margin-bottom: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
+        summary { padding: 15px; font-weight: bold; color: #455a64; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; background: #fcfcfc; }
+        summary::after { content: "▼"; font-size: 12px; color: #90a4ae; transition: 0.2s; }
+        details[open] summary::after { transform: rotate(180deg); }
+        details[open] summary { border-bottom: 1px solid #eceff1; }
         
-        .btn { background: #29b6f6; color: white; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; border: none; cursor: pointer; }
+        /* 📄 FILE CARD */
+        .file-item { padding: 12px 15px; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; }
+        .file-item:last-child { border-bottom: none; }
+        .file-name { font-size: 14px; color: #333; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 60%; }
+        
+        .btn { background: #29b6f6; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none; cursor: pointer; }
         .fab { position: fixed; bottom: 20px; right: 20px; background: #0088cc; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; transition: transform 0.2s; }
-        .fab:hover { transform: scale(1.1); background: #0077b5; }
         
         .loader { margin-top: 20px; color: #78909c; text-align: center; }
     </style>
 </head>
-<body oncontextmenu="return false"> <div id="login-screen">
+<body oncontextmenu="return false">
+
+    <div id="login-screen">
         <div class="login-box">
             <h2>🔒 Secure Cloud</h2>
             <input type="password" id="password" class="pass-input" placeholder="Enter Password">
@@ -66,8 +72,7 @@
         const SECRET_PASS = "INFICLOUD"; 
 
         function checkPassword() {
-            const input = document.getElementById("password").value.trim();
-            if (input === SECRET_PASS) {
+            if (document.getElementById("password").value.trim() === SECRET_PASS) {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("app-screen").style.display = "block";
                 loadFiles(); 
@@ -77,26 +82,31 @@
             }
         }
 
-        // 🔄 NEW REFRESH FUNCTION
         function refreshApp() {
-            const container = document.getElementById('file-list');
-            container.innerHTML = "🔄 Refreshing...";
-            document.getElementById('search').value = ""; // Clear search
-            loadFiles(); // Reload data
+            document.getElementById('file-list').innerHTML = "🔄 Refreshing...";
+            document.getElementById('search').value = "";
+            loadFiles();
         }
 
         function filterFiles() {
             const query = document.getElementById('search').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(card => {
-                const name = card.querySelector('span').textContent.toLowerCase();
-                card.style.display = name.includes(query) ? "flex" : "none";
+            document.querySelectorAll('.file-item').forEach(item => {
+                const name = item.querySelector('.file-name').textContent.toLowerCase();
+                // When searching, we show the file but might hide the folder structure visually if you want, 
+                // but simpler is to just hide non-matching items.
+                item.style.display = name.includes(query) ? "flex" : "none";
+            });
+            
+            // Auto-open folders if they contain matches
+            document.querySelectorAll('details').forEach(folder => {
+                const hasVisible = Array.from(folder.querySelectorAll('.file-item')).some(i => i.style.display !== "none");
+                folder.style.display = hasVisible ? "block" : "none";
+                if (query.length > 0) folder.open = true; // Open folders when searching
             });
         }
 
         async function loadFiles() {
             const container = document.getElementById('file-list');
-            
-            // ⚡ ANTI-LAG (Timestamp)
             const time = new Date().getTime(); 
             const telegramUrl = `https://api.telegram.org/bot${TOKEN}/getChat?chat_id=${CHANNEL}&cb=${time}`;
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(telegramUrl)}&t=${time}`;
@@ -109,41 +119,86 @@
                 container.innerHTML = "";
                 if (Object.keys(files).length === 0) { container.innerHTML = "📂 No files found."; return; }
 
+                // 1. Group Files into Folders
+                const folders = { "📂 General": [] };
+                
                 for (const [name, id] of Object.entries(files)) {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    const nameSpan = document.createElement('span');
-                    nameSpan.textContent = name;
-                    const btn = document.createElement('a');
+                    // Check for [Category] Name format
+                    const match = name.match(/^\[(.*?)\]\s*(.*)/);
+                    let folderName = "📂 General";
+                    let displayName = name;
                     
-                    if (typeof id === 'number') {
-                        btn.textContent = "Open App";
-                        btn.className = "btn old";
-                        btn.href = `https://t.me/c/${CHANNEL.replace('-100', '')}/${id}`;
-                    } else {
-                        btn.textContent = "⬇ Download";
-                        btn.className = "btn";
-                        btn.href = "#";
-                        btn.onclick = async (e) => {
-                            e.preventDefault();
-                            btn.textContent = "⏳ Link...";
-                            const dlTime = new Date().getTime();
-                            const pathUrl = `https://api.telegram.org/bot${TOKEN}/getFile?file_id=${id}&cb=${dlTime}`;
-                            const pathProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(pathUrl)}&t=${dlTime}`;
-                            
-                            try {
-                                const res = await fetch(pathProxy);
-                                const json = await res.json();
-                                const filePath = JSON.parse(json.contents).result.file_path;
-                                window.location.href = `https://api.telegram.org/file/bot${TOKEN}/${filePath}`;
-                                btn.textContent = "✅ Started";
-                            } catch (err) { btn.textContent = "❌ Error"; }
-                        };
+                    if (match) {
+                        folderName = "📁 " + match[1]; // The text inside []
+                        displayName = match[2]; // The text after []
                     }
-                    card.appendChild(nameSpan);
-                    card.appendChild(btn);
-                    container.appendChild(card);
+                    
+                    if (!folders[folderName]) folders[folderName] = [];
+                    
+                    // Add Icon Logic Here
+                    let icon = "📄";
+                    const lower = name.toLowerCase();
+                    if (lower.endsWith('.pdf')) icon = "📕";
+                    else if (lower.endsWith('.jpg') || lower.endsWith('.png')) icon = "🖼️";
+                    else if (lower.endsWith('.mp4')) icon = "🎥";
+                    else if (lower.endsWith('.zip')) icon = "📦";
+
+                    folders[folderName].push({ name: `${icon} ${displayName}`, id: id });
                 }
+
+                // 2. Render Folders
+                for (const [folderName, items] of Object.entries(folders)) {
+                    if (items.length === 0) continue;
+
+                    const details = document.createElement('details');
+                    details.open = true; // Default to open
+                    
+                    const summary = document.createElement('summary');
+                    summary.textContent = folderName;
+                    details.appendChild(summary);
+
+                    items.forEach(file => {
+                        const div = document.createElement('div');
+                        div.className = 'file-item';
+                        
+                        const span = document.createElement('span');
+                        span.className = 'file-name';
+                        span.textContent = file.name;
+                        
+                        const btn = document.createElement('a');
+                        if (typeof file.id === 'number') {
+                            btn.textContent = "Open";
+                            btn.className = "btn";
+                            btn.style.background = "#90a4ae";
+                            btn.href = `https://t.me/c/${CHANNEL.replace('-100', '')}/${file.id}`;
+                        } else {
+                            btn.textContent = "⬇ Get";
+                            btn.className = "btn";
+                            btn.href = "#";
+                            btn.onclick = async (e) => {
+                                e.preventDefault();
+                                btn.textContent = "⏳";
+                                const dlTime = new Date().getTime();
+                                const pathUrl = `https://api.telegram.org/bot${TOKEN}/getFile?file_id=${file.id}&cb=${dlTime}`;
+                                const pathProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(pathUrl)}&t=${dlTime}`;
+                                try {
+                                    const res = await fetch(pathProxy);
+                                    const json = await res.json();
+                                    const filePath = JSON.parse(json.contents).result.file_path;
+                                    window.location.href = `https://api.telegram.org/file/bot${TOKEN}/${filePath}`;
+                                    btn.textContent = "✅";
+                                } catch (err) { btn.textContent = "❌"; }
+                            };
+                        }
+                        
+                        div.appendChild(span);
+                        div.appendChild(btn);
+                        details.appendChild(div);
+                    });
+                    
+                    container.appendChild(details);
+                }
+                
             } catch (error) { container.innerHTML = "❌ Connection Error."; }
         }
         
