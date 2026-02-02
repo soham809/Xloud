@@ -3,40 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Cloud</title>
+    <title>My Secure Cloud</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eceff1; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* --- LOGIN SCREEN CSS --- */
+        /* --- LOGIN SCREEN --- */
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; background: #263238; position: fixed; top: 0; left: 0; z-index: 1000; }
         .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 80%; max-width: 300px; }
-        .login-box h2 { margin-top: 0; color: #333; }
         .pass-input { width: 90%; padding: 10px; margin: 15px 0; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; outline: none; }
-        .pass-input:focus { border-color: #0088cc; }
         .login-btn { background: #0088cc; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; }
-        .login-btn:active { transform: scale(0.98); }
         .error-msg { color: red; font-size: 14px; margin-top: 10px; display: none; }
 
-        /* --- APP SCREEN CSS (Hidden by default) --- */
-        #app-screen { display: none; width: 100%; max-width: 600px; padding: 20px; }
-        h1 { color: #37474f; margin-top: 20px; }
+        /* --- APP SCREEN --- */
+        #app-screen { display: none; width: 100%; max-width: 600px; padding: 20px; padding-bottom: 80px; }
+        h1 { color: #37474f; margin-top: 10px; text-align: center; }
         
+        /* 🔍 SEARCH BAR */
+        .search-box { width: 100%; margin-bottom: 20px; display: flex; }
+        .search-input { width: 100%; padding: 12px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 16px; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* 📂 CARD DESIGN */
         .card { background: white; padding: 15px; margin: 10px 0; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         .card span { font-size: 15px; color: #333; font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 55%; }
         
         .btn { background: #29b6f6; color: white; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; border: none; cursor: pointer; }
         .btn:hover { background: #0288d1; }
         .btn.old { background: #90a4ae; } 
-        .loader { margin-top: 20px; color: #78909c; }
+
+        /* ➕ UPLOAD BUTTON */
+        .fab { position: fixed; bottom: 20px; right: 20px; background: #0088cc; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; transition: transform 0.2s; }
+        .fab:hover { transform: scale(1.1); background: #0077b5; }
+
+        .loader { margin-top: 20px; color: #78909c; text-align: center; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-box">
-            <h2>🔒 Security Check</h2>
-            <p>Enter password to access files.</p>
-            <input type="password" id="password" class="pass-input" placeholder="Password">
+            <h2>🔒 Cloud Login</h2>
+            <input type="password" id="password" class="pass-input" placeholder="Enter Password">
             <button class="login-btn" onclick="checkPassword()">Unlock</button>
             <div id="error-msg" class="error-msg">❌ Wrong Password</div>
         </div>
@@ -44,53 +50,59 @@
 
     <div id="app-screen">
         <h1>☁️ My Secure Cloud</h1>
+        
+        <div class="search-box">
+            <input type="text" id="search" class="search-input" placeholder="🔍 Search files..." onkeyup="filterFiles()">
+        </div>
+
         <div id="file-list" class="loader">Loading files...</div>
+
+        <a href="https://t.me/database_sohambot" target="_blank" class="fab">➕</a>
     </div>
 
     <script>
-        // ✅ YOUR CONFIGURATION
+        // ✅ YOUR CREDENTIALS
         const TOKEN = "8410712491:AAGm9dIzF3tgnLkDOGveixXd09Ktb4K5Tco"; 
         const CHANNEL = "-1003798813712";
-        const SECRET_PASS = "INFICLOUD"; // 🔑 The Password
+        const SECRET_PASS = "INFICLOUD"; 
 
-        // 1. PASSWORD CHECK FUNCTION
         function checkPassword() {
-            const input = document.getElementById("password").value;
-            const error = document.getElementById("error-msg");
-            
-            if (input === SECRET_PASS) {
-                // Success: Hide Login, Show App, Load Files
+            if (document.getElementById("password").value === SECRET_PASS) {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("app-screen").style.display = "block";
-                loadFiles(); // Only start loading data AFTER login
+                loadFiles(); 
             } else {
-                // Fail: Show error
-                error.style.display = "block";
-                document.getElementById("password").value = "";
+                document.getElementById("error-msg").style.display = "block";
             }
         }
 
-        // Allow pressing "Enter" key to login
-        document.getElementById("password").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") checkPassword();
-        });
+        function filterFiles() {
+            const query = document.getElementById('search').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(card => {
+                const name = card.querySelector('span').textContent.toLowerCase();
+                card.style.display = name.includes(query) ? "flex" : "none";
+            });
+        }
 
-        // 2. MAIN APP LOGIC (Same as before)
         async function loadFiles() {
             const container = document.getElementById('file-list');
-            const telegramUrl = `https://api.telegram.org/bot${TOKEN}/getChat?chat_id=${CHANNEL}`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(telegramUrl)}`;
+            
+            // ⚡ FORCE FRESH UPDATE (Anti-Lag)
+            const time = new Date().getTime(); 
+            const telegramUrl = `https://api.telegram.org/bot${TOKEN}/getChat?chat_id=${CHANNEL}&cb=${time}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(telegramUrl)}&t=${time}`;
 
             try {
                 const response = await fetch(proxyUrl);
                 const data = await response.json();
+                
+                // Parse the Data
                 const files = JSON.parse(JSON.parse(data.contents).result.pinned_message.text);
                 
                 container.innerHTML = "";
 
                 if (Object.keys(files).length === 0) {
-                    container.innerHTML = "📂 No files found.";
-                    return;
+                    container.innerHTML = "📂 No files found."; return;
                 }
 
                 for (const [name, id] of Object.entries(files)) {
@@ -103,19 +115,24 @@
                     const btn = document.createElement('a');
                     
                     if (typeof id === 'number') {
+                        // Old Files
                         btn.textContent = "Open App";
                         btn.className = "btn old";
                         btn.href = `https://t.me/c/${CHANNEL.replace('-100', '')}/${id}`;
                         btn.target = "_blank";
                     } else {
+                        // New Files (Direct Download)
                         btn.textContent = "⬇ Download";
                         btn.className = "btn";
                         btn.href = "#";
                         btn.onclick = async (e) => {
                             e.preventDefault();
                             btn.textContent = "⏳ Link...";
-                            const pathUrl = `https://api.telegram.org/bot${TOKEN}/getFile?file_id=${id}`;
-                            const pathProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(pathUrl)}`;
+                            
+                            // Anti-Lag for downloads too
+                            const dlTime = new Date().getTime();
+                            const pathUrl = `https://api.telegram.org/bot${TOKEN}/getFile?file_id=${id}&cb=${dlTime}`;
+                            const pathProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(pathUrl)}&t=${dlTime}`;
                             
                             try {
                                 const res = await fetch(pathProxy);
@@ -124,7 +141,6 @@
                                 window.location.href = `https://api.telegram.org/file/bot${TOKEN}/${filePath}`;
                                 btn.textContent = "✅ Started";
                             } catch (err) {
-                                alert("Link expired or error.");
                                 btn.textContent = "❌ Error";
                             }
                         };
@@ -135,10 +151,11 @@
                     container.appendChild(card);
                 }
             } catch (error) {
-                container.innerHTML = "❌ Error loading files.";
+                container.innerHTML = "❌ Error loading files. Check connection.";
             }
         }
+        
+        document.getElementById("password").addEventListener("keypress", (e) => { if (e.key === "Enter") checkPassword(); });
     </script>
-
 </body>
 </html>
